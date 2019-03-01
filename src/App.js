@@ -8,14 +8,28 @@ class App extends Component {
   }
   componentDidMount() {
     axios.get('http://localhost:3500').then(res=> {
-      console.log(res.data);
-      this.setState({data :res.data})
+       this.setState({data :res.data})
     }).catch(err => {
       console.log(err);
     })
   }
+  onDragStart = (e,idx) => {
+  this.draggedItem = this.state.data[idx];
+  e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/html", e.target);
+  };
+  onDragOver = index => {
+    const draggedOverItem = this.state.data[index];
+   if (this.draggedItem === draggedOverItem) {
+      return;
+    }
+    let items = this.state.data.filter(item => item !== this.draggedItem);
+    // add the dragged item after the dragged over item
+    items.splice(index, 0, this.draggedItem);
+    console.log("items",items)
+    this.setState({ data: items });
+  };
   render() {
-    console.log(this.state.data)
     return (
       <div className="App">
         <h1>
@@ -32,11 +46,11 @@ class App extends Component {
         </tr>
         </thead>
         
-        <tbody onDrop ={() => {console.log("guru")}}>
+        <tbody>
           
         {
-          this.state.data.map(res => (
-           <tr key={res.id} draggable={true} >
+          this.state.data.map((res,idx) => (
+           <tr draggable={true}  onDragStart={e => this.onDragStart(e,idx)} onDragOver={() => this.onDragOver(idx)} key={res.id}>
               <td>
                 {res.id}
               </td>
@@ -47,7 +61,7 @@ class App extends Component {
                 {res.priority}
               </td>
               </tr>
-            
+              
             
           )         
           )
