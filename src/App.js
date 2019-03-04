@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import './App.css';
-
+import { connect } from 'react-redux';
+import { taskListAction } from './action/TaskListAction';
 class App extends Component {
   state = {
     data: []
   }
   componentDidMount() {
+    this.props.taskListFetch([]);
     axios.get('http://localhost:3500').then(res=> {
-       this.setState({data :res.data})
+        this.setState({data :res.data})
+        this.props.taskListFetch(res.data);
     }).catch(err => {
       console.log(err);
     })
@@ -30,6 +33,7 @@ class App extends Component {
     this.setState({ data: items });
   };
   render() {
+    console.log(this.props.task)
     return (
       <div className="App">
         <h1>
@@ -50,7 +54,7 @@ class App extends Component {
           
         {
           this.state.data.map((res,idx) => (
-           <tr draggable={true}  onDragStart={e => this.onDragStart(e,idx)} onDragOver={() => this.onDragOver(idx)} key={res.id}>
+           <tr draggable={true}  onDragStart={e => this.onDragStart(e,idx)} onDragOver={() => this.onDragOver(idx)} key={res.id} onDragEnd={()=>this.draggedItem = null}>
               <td>
                 {res.id}
               </td>
@@ -74,4 +78,6 @@ class App extends Component {
   }
 }
 
-export default App;
+export default connect(state => ({
+    task : state
+}),{taskListFetch: taskListAction} )(App);
