@@ -8,32 +8,28 @@ class App extends Component {
     data: []
   }
   componentDidMount() {
-    this.props.taskListFetch([]);
     axios.get('http://localhost:3500').then(res=> {
-        this.setState({data :res.data})
-        this.props.taskListFetch(res.data);
+        this.props.taskListAction(res.data);
     }).catch(err => {
       console.log(err);
     })
   }
   onDragStart = (e,idx) => {
-  this.draggedItem = this.state.data[idx];
+  this.draggedItem = this.props.task[idx];
   e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/html", e.target);
   };
   onDragOver = index => {
-    const draggedOverItem = this.state.data[index];
+    const draggedOverItem = this.props.task[index];
    if (this.draggedItem === draggedOverItem) {
       return;
     }
-    let items = this.state.data.filter(item => item !== this.draggedItem);
+    let items = this.props.task.filter(item => item !== this.draggedItem);
     // add the dragged item after the dragged over item
     items.splice(index, 0, this.draggedItem);
-    console.log("items",items)
-    this.setState({ data: items });
+    this.props.taskListAction(items);
   };
   render() {
-    console.log(this.props.task)
     return (
       <div className="App">
         <h1>
@@ -53,7 +49,7 @@ class App extends Component {
         <tbody>
           
         {
-          this.state.data.map((res,idx) => (
+          this.props.task.map((res,idx) => (
            <tr draggable={true}  onDragStart={e => this.onDragStart(e,idx)} onDragOver={() => this.onDragOver(idx)} key={res.id} onDragEnd={()=>this.draggedItem = null}>
               <td>
                 {res.id}
@@ -78,6 +74,8 @@ class App extends Component {
   }
 }
 
+
+
 export default connect(state => ({
-    task : state
-}),{taskListFetch: taskListAction} )(App);
+    task : state.taskList
+}),{taskListAction} )(App);
